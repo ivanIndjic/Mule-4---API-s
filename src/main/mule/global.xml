@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="5c7d195e-a442-4019-9dfb-b99b45bed7fb" >
+		<db:oracle-connection host="10.0.200.33" user="soademo" password="soademo" instance="xe" />
+	</db:config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="83724092-1286-4c19-911b-3308fe0db312" >
+		<file:connection workingDir="C:\Users\Ivan\AnypointStudio\studio-workspace\vuvuzela\src\main\resources\chineseERP" />
+	</file:config>
+	<file:config name="File_Config1" doc:name="File Config" doc:id="c7dbb717-e1a5-4028-a887-3df478482512" >
+		<file:connection workingDir="C:\Users\Ivan\AnypointStudio\studio-workspace\vuvuzela\src\main\resources\vuvuzelaERP" />
+	</file:config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="b2c52b97-4f27-4d35-bf58-6c834c51fb46" >
+		<email:smtp-connection host="smtp.gmail.com" port="585" user="ivanindjic@gmail.com" password="ivanindjic55555" />
+	</email:smtp-config>
+</mule>

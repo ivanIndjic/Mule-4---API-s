@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+
+	<flow name="mainFlow" doc:id="8f69c53e-d9dc-4b54-9f47-fcbdb5229e24" >
+		<choice doc:name="Choice" doc:id="8e366a0e-e25e-4642-9239-ef15bb5d16f8" >
+			<when expression="#[vars.order.'vuvuzelaType' == 'C' and vars.order.'vuvuzelaAmount'&gt;100]">
+				<file:write doc:name="WriteJSON" doc:id="48948605-103d-4387-9c90-0121bb0b64ca" config-ref="File_Config" path="#['chineseERP' ++ vars.order.'customerName' as String ++ random() * 10000]">
+					<file:content ><![CDATA[#[{
+"customerID":vars.order.'customerID',
+"customerName":vars.order.'customerName',
+"customerSurname":vars.order.'customerSurname',
+"vuvuzelaType":vars.order.'vuvuzelaType',
+"vuvuzelaAmount":vars.order.'vuvuzelaAmount' as Number * 2
+}]]]></file:content>
+				</file:write>
+				<db:select doc:name="getCostomer" doc:id="1ad144fa-41ae-4208-b327-3619cac2a02d" config-ref="Database_Config">
+					<db:sql>select * from vuvuzela_indjic where customerid = :id</db:sql>
+					<db:input-parameters><![CDATA[#[{'id':vars.order.'customerID'}]]]></db:input-parameters>
+				</db:select>
+				<choice doc:name="exist" doc:id="303a14b0-6f1b-4dec-9a68-38f965829f9c">
+					<when expression="#[payload.customerID == null]">
+						<db:insert doc:name="insertCustomer" doc:id="7474d875-95dd-40eb-91d3-f6dac5617b56" config-ref="Database_Config">
+							<db:sql>insert into vuvuzela_indjic(customerid,customername,customersurname) values (:id,:name,:surname)</db:sql>
+							<db:input-parameters><![CDATA[#[{'id':vars.order.'customerID',
+ 'name':vars.order.'customerName',
+ 'surname':vars.order.'customerSurname'
+}]]]></db:input-parameters>
+						</db:insert>
+					</when>
+				</choice>
+				<ee:transform doc:name="Transform Message" doc:id="1ad8c79b-b1d0-48ac-9d0d-84f799a71424">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/csv
+headerLineNumber = 1 , header = true
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	CUSTOMERID: payload01.customerID,
+	CUSTOMERNAME: payload01.customerName,
+	CUTOMERSURNAME: payload01.customerSurname,
+	VUVUZELATYPE: payload01.vuvuzelaType,
+	VUVUZELAAMOUNT: payload01.vuvuzelaAmount
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<email:send doc:name="Send" doc:id="1f40ef01-0978-4226-9f10-e0e7971bd30d" config-ref="Email_SMTP" fromAddress="ivanindjic@gmail.com" subject="HI">
+					<email:to-addresses>
+						<email:to-address value="ivan123indjic@gmail.com" />
+					</email:to-addresses>
+				</email:send>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="8976a2ed-2225-4133-98cd-329f6d22f71b">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	order: {
+		customerID: payload.customerID,
+		customerName: payload.customerName,
+		customerSurname: payload.customerSurname,
+		vuvuzelaType: payload.vuvuzelaType,
+		vuvuzelaAmount: payload.vuvuzelaAmount
+	}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<file:write doc:name="WriteXML" doc:id="0d1c9717-4f55-45c6-9530-7d28116507d6" config-ref="File_Config1" path="#['vuvuzelaERP' ++ vars.order.'customerName' as String ++ random() * 1000 as Number]"/>
+				<db:select doc:name="SelectCustomer" doc:id="122a2f89-d04f-454e-ae57-9571b1a3e8f9" config-ref="Database_Config" >
+					<db:sql >select * from vuvuzela_indjic where customerid = :id</db:sql>
+					<db:input-parameters ><![CDATA[#[{'id':vars.order.'customerID'}]]]></db:input-parameters>
+				</db:select>
+				<choice doc:name="exist" doc:id="9d51c94f-b1e6-4eca-ab9f-ad160d40dfd2">
+					<when expression="#[payload.customerID == null]">
+						<db:insert doc:name="insertCustomer" doc:id="4097f151-f6a4-44e3-85a5-17526fa1c732" config-ref="Database_Config">
+					<db:sql>insert into vuvuzela_indjic(customerid,customername,customersurname) values (:id,:name,:surname)</db:sql>
+					<db:input-parameters><![CDATA[#[{'id':vars.order.'customerID',
+ 'name':vars.order.'customerName',
+ 'surname':vars.order.'customerSurname'
+}]]]></db:input-parameters>
+				</db:insert>
+					</when>
+				</choice>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

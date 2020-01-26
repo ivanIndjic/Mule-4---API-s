@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="exampeIN" format="json">
+      <types:shape format="weave" example="examples/example.json"><![CDATA[%dw 2.0
+
+type exampeIN = {|
+  customerID: Number {"typeId": "int"}, 
+  customerName: String, 
+  customerSurname: String, 
+  vuvuzelaType: String, 
+  vuvuzelaAmount: Number {"typeId": "int"}
+|} {"example": "{\"customerID\":1,\"customerName\":\"Indjicovic\",\"customerSurname\":\"asd\",\"vuvuzelaType\":\"C\",\"vuvuzelaAmount\":1000}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="XML" format="xml">
+      <types:example format="xml" element="order" location="examples/example.xml"/>
+    </types:type>
+    <types:type name="mailCSV" format="csv">
+      <types:shape format="weave"><![CDATA[%dw 2.0
+
+type mailCSV = Array<{|  CUSTOMERID: Number,   CUSTOMERNAME: String,   CUTOMERSURNAME: String,   VUVUZELATYPE: String,   VUVUZELAAMOUNT: Number|}>
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+    <types:type name="JSONWRAP" format="json">
+      <types:shape format="weave" example="examples/example.json"><![CDATA[%dw 2.0
+
+type JSONWRAP = {|
+  customerID: Number {"typeId": "int"}, 
+  customerName: String, 
+  customerSurname: String, 
+  vuvuzelaType: String, 
+  vuvuzelaAmount: Number {"typeId": "int"}
+|} {"example": "{\"customerID\":1,\"customerName\":\"Indjicovic\",\"customerSurname\":\"asd\",\"vuvuzelaType\":\"C\",\"vuvuzelaAmount\":1000}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#1ad8c79b-b1d0-48ac-9d0d-84f799a71424">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="JSONWRAP[]"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="mailCSV"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#8976a2ed-2225-4133-98cd-329f6d22f71b">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="exampeIN"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="XML"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

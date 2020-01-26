@@ -1,0 +1,27 @@
+#%RAML 1.0
+version: v1
+title: Vuvuzela API
+types:
+  Order: !include types/dataType.raml
+
+/orders:
+  post:
+    body:
+      application/json:
+        type: Order
+        example: !include examples/order.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Order successfully created
+      409:
+        body:
+          application/json:
+            example:
+              message: Employee already exists
+
+
+
+    
